@@ -1,5 +1,3 @@
-//By Jessica B and Robert I
-
 package application;
 	
 import java.io.DataInputStream;
@@ -32,6 +30,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 /*
  * 
@@ -62,6 +61,11 @@ public class Main extends Application implements Constants {
 	Label alert = new Label();
 	Label playerLbl = new Label("Player");
 	Label statusLbl = new Label("Game Status");
+	Text opponentsShipsLbl = new Text("Opponent's\nships:");
+	Text battleshipLbl = new Text("Battleship");
+	Text submarineLbl = new Text("Submarine");
+	Text destroyerLbl = new Text("Destroyer");
+	Text patrolBoatLbl = new Text("Patrol Boat");
 	int player;
 	BorderPane root = new BorderPane();
 	Pane gridPane = new Pane();
@@ -79,7 +83,7 @@ public class Main extends Application implements Constants {
 	
 	@Override
 	public void start(Stage primaryStage) throws UnknownHostException, IOException {
-			Scene scene = new Scene(root, 400, 600);
+			Scene scene = new Scene(root, 390, 625);
 			alert.setTextFill(Color.RED);
 
 			drawGrid(topGrid, gridPane, 10, 10);
@@ -121,17 +125,28 @@ public class Main extends Application implements Constants {
 					});
 				}
 			}//end square highlight
+			VBox vbox = new VBox(10);
+			vbox.getChildren().addAll(opponentsShipsLbl, battleshipLbl, submarineLbl, destroyerLbl, patrolBoatLbl);
 			HBox hbox = new HBox(10);
 			hbox.getChildren().addAll(playerLbl, statusLbl);
 			root.setCenter(gridPane);
+			root.setRight(vbox);
 			root.setTop(hbox);
-			
-			connectToServer();
+			root.setPadding(new Insets(10, 10, 10, 10));
+			BorderPane.setAlignment(vbox, Pos.CENTER);
+			BorderPane.setAlignment(statusLbl, Pos.CENTER);
+			playerLbl.setFont(Font.font(18));
+			statusLbl.setFont(Font.font(18));
+			opponentsShipsLbl.setFont(Font.font(13));
+			battleshipLbl.setFill(Color.GREEN);
+			submarineLbl.setFill(Color.GREEN);
+			destroyerLbl.setFill(Color.GREEN);
+			patrolBoatLbl.setFill(Color.GREEN);
+			connectToServer();	
 	}//end start()
 	
 	public void connectToServer() throws UnknownHostException, IOException{
 		Socket socket = new Socket("localhost", 8000);
-		//Socket socket = new Socket("153.91.62.3", 8000);
 		System.out.println("CONNECTED");
 		toServer = new DataOutputStream(socket.getOutputStream());		
 		fromServer = new DataInputStream(socket.getInputStream());
@@ -247,19 +262,14 @@ public class Main extends Application implements Constants {
 		System.out.println("client rec "+rowReceived +" "+ colReceived);
 		boolean isHit = isHit(/*ships,*/ rowReceived, colReceived);
 		if(isHit){
-			if(player == PLAYER1){
+			if(player == PLAYER1)
 			bottomGrid[rowReceived][colReceived].setFill(Color.RED);
-			}
-			if(player == PLAYER2){
+			if(player == PLAYER2)
 				bottomGrid[rowReceived][colReceived].setFill(Color.RED);
-			}
-			
 		}
 		else{
-		
 			if(player == PLAYER1)
 				bottomGrid[rowReceived][colReceived].setFill(Color.DARKBLUE);
-			
 			if(player == PLAYER2)
 				bottomGrid[rowReceived][colReceived].setFill(Color.DARKBLUE);
 				
@@ -268,34 +278,23 @@ public class Main extends Application implements Constants {
 		System.out.println("sent" + isHit);
 	}//end receiveCoord()
 	
-	
 	public void receiveIsHit() throws IOException{
 		boolean isHit = fromServer.readBoolean();
 		System.out.println("rec " + isHit);
-		Coordinate hit = new Coordinate(rowReceived, colReceived);
+		////CHANGE COLOR OF SHIP HIT//////////////////////////////////////////
+		battleshipLbl.setFill(Color.RED);
+		//Coordinate hit = new Coordinate(rowReceived, colReceived);
 		if(isHit){
-			if(player == PLAYER1){
-			topGrid[rowSelected][colSelected].setFill(Color.RED);
-			}
-			if(player == PLAYER2){
+			if(player == PLAYER1)
 				topGrid[rowSelected][colSelected].setFill(Color.RED);
-			}
-			//remove coord from ship list
-			for(Ship ship: ships){
-				if((ship.getCoordinates().contains(hit))){
-					//ship.removeCoordinate(hit);
-					ship.toString();
-				}
-			}
+			if(player == PLAYER2)
+				topGrid[rowSelected][colSelected].setFill(Color.RED);
 		}
 		else{
-		
 			if(player == PLAYER1)
-				topGrid[rowSelected][colSelected].setFill(Color.DARKBLUE);
-			
+				topGrid[rowSelected][colSelected].setFill(Color.DARKBLUE);	
 			if(player == PLAYER2)
-				topGrid[rowSelected][colSelected].setFill(Color.DARKBLUE);
-				
+				topGrid[rowSelected][colSelected].setFill(Color.DARKBLUE);		
 		}
 	}//end receiveIsHit()
 	
@@ -322,7 +321,7 @@ public class Main extends Application implements Constants {
 	 }//end waitForAction()
 	
 	/*
-	 * determines if coordinate received from server is a hit or miss
+	 * determines if coordinate received from opponent is a hit or miss
 	 */
 	private boolean isHit(/*ArrayList<Ship> list, */int row, int col){
 		Coordinate c = new Coordinate(row, col);
@@ -335,8 +334,11 @@ public class Main extends Application implements Constants {
 				else
 					player2Count++;
 				
-			}
-		}
+				//remove coord from ship list
+				s.removeCoordinate(c);
+				System.out.print("REMOVED COORDINATE: " + c.toString() + s.toString());
+			}//end if
+		}//end for
 		return isHit;
 	}//end isHit()
 	
