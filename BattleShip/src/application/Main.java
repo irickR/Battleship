@@ -72,7 +72,8 @@ public class Main extends Application implements Constants {
 	DataOutputStream toServer = null;
 	DataInputStream fromServer = null;
 	boolean continueToPlay = true;
-	boolean myTurn = false;
+	boolean p1Turn = false;
+	boolean p2Turn = false;
 	boolean waiting = true;
 	int rowSelected;
 	int colSelected;
@@ -80,7 +81,8 @@ public class Main extends Application implements Constants {
 	int colReceived;
 	int player1Count = 0;
 	int player2Count = 0;
-	
+	Stage primaryStage;
+	String hitShip = ""; 
 	@Override
 	public void start(Stage primaryStage) throws UnknownHostException, IOException {
 			Scene scene = new Scene(root, 390, 625);
@@ -170,9 +172,11 @@ public class Main extends Application implements Constants {
 	          // The other player has joined
 	          Platform.runLater(() -> 
 	          statusLbl.setText("Player 2 has joined. I start first"));
+	          
 	  
 	          // It is my turn
-	          myTurn = true;
+	          p1Turn = true;
+	          
 	        }
 	        else if (player == PLAYER2) {
 	          Platform.runLater(() -> {
@@ -187,10 +191,19 @@ public class Main extends Application implements Constants {
 	        			printWinnings();
 	        	
 	          if (player == PLAYER1) {
+	        	Platform.runLater(() -> {
+		            statusLbl.setText("Your move.");
+		          });
 	        	waitForAction(); // Wait for player 1 to move
+	        	
 	            sendCoord(); 
 	            System.out.println("Player 1 sent a cord.");// Send the move to the server
 	            receiveIsHit(); //recieve if its a hit or miss from server
+	            p1Turn = false;
+	            p2Turn = true;
+	            Platform.runLater(() -> {
+		            statusLbl.setText("Waiting for Player 2 to move.");
+		          });
 	            receiveCoord();
 	           // receiveInfoFromServer();
 	          }
@@ -200,9 +213,18 @@ public class Main extends Application implements Constants {
 	            receiveCoord(); // Receive info from the server
 	           // Determine if its hit and send RECEIVE COORD DOES THIS TOO
 	           // Wait for player 2 to move
+	            Platform.runLater(() -> {
+		            statusLbl.setText("Your move.");
+		          });
 	            waitForAction(); 
+	            
 	            sendCoord(); // Send player 2's move to the server
 	            receiveIsHit();
+	            p2Turn = false;
+	            p1Turn = true; 
+	            Platform.runLater(() -> {
+		            statusLbl.setText("Waiting for Player 1 to move.");
+		          });
 	          
 	          }
 	        }//end while continueToPlay
@@ -217,41 +239,6 @@ public class Main extends Application implements Constants {
 		
 	}
 	
-	/*private void receiveInfoFromServer() throws IOException {
-	    // Receive game status
-	    int status = fromServer.readInt();
-
-	    if (status == PLAYER1_WON) {
-	      // Player 1 won, stop playing
-	      continueToPlay = false;
-	      if (player == PLAYER1) {
-	        Platform.runLater(() -> statusLbl.setText("I won!"));
-	      }
-	      else if (player == PLAYER2) {
-	        Platform.runLater(() -> 
-	        statusLbl.setText("Player 1 has won!"));
-	        //receiveCoord();
-	      }
-	    }
-	    else if (status == PLAYER2_WON) {
-	      // Player 2 won, stop playing
-	      continueToPlay = false;
-	      if (player == PLAYER2) {
-	        Platform.runLater(() -> statusLbl.setText("I won!"));
-	      }
-	      else if (player == PLAYER1) {
-	        Platform.runLater(() -> 
-	        statusLbl.setText("Player 2  has won!"));
-	        //receiveCoord();
-	      }
-	    }
-
-	    else if(status == CONTINUE){
-	      receiveCoord();
-	      Platform.runLater(() -> statusLbl.setText("My turn"));
-	      myTurn = true; // It is my turn
-	    }
-	  }//end recieve info from server*/
 	
 	/*
 	 * receive coordinates that opponent chose and determine if it is a hit or miss, send this to server to inform opponent
@@ -259,8 +246,10 @@ public class Main extends Application implements Constants {
 	public void receiveCoord() throws IOException{
 		rowReceived = fromServer.readInt();
 		colReceived = fromServer.readInt();
+		
 		System.out.println("client rec "+rowReceived +" "+ colReceived);
 		boolean isHit = isHit(/*ships,*/ rowReceived, colReceived);
+		
 		if(isHit){
 			if(player == PLAYER1)
 			bottomGrid[rowReceived][colReceived].setFill(Color.RED);
@@ -274,15 +263,31 @@ public class Main extends Application implements Constants {
 				bottomGrid[rowReceived][colReceived].setFill(Color.DARKBLUE);
 				
 		}
-		toServer.writeBoolean(isHit);
+		//toServer.writeBoolean(isHit);
 		System.out.println("sent" + isHit);
 	}//end receiveCoord()
 	
 	public void receiveIsHit() throws IOException{
 		boolean isHit = fromServer.readBoolean();
+		String hitShip = fromServer.readUTF();
+		
 		System.out.println("rec " + isHit);
 		////CHANGE COLOR OF SHIP HIT//////////////////////////////////////////
-		battleshipLbl.setFill(Color.RED);
+		switch(hitShip) {
+			case("BattleShip"):
+				battleshipLbl.setFill(Color.ORANGE);
+				break;
+			case("Submarine"):
+				battleshipLbl.setFill(Color.ORANGE);
+				break;
+			case("Destroyer"):
+				battleshipLbl.setFill(Color.ORANGE);
+				break;
+			case("Patrol Boat"):
+				battleshipLbl.setFill(Color.ORANGE);
+				break;
+
+		}
 		//Coordinate hit = new Coordinate(rowReceived, colReceived);
 		if(isHit){
 			if(player == PLAYER1)
@@ -323,23 +328,22 @@ public class Main extends Application implements Constants {
 	/*
 	 * determines if coordinate received from opponent is a hit or miss
 	 */
-	private boolean isHit(/*ArrayList<Ship> list, */int row, int col){
+	private boolean isHit(/*ArrayList<Ship> list, */int row, int col) throws IOException{
 		Coordinate c = new Coordinate(row, col);
 		boolean isHit = false;
 		for(Ship s: ships){
 			if(s.getCoordinates().contains(c)){
-				isHit = true;
-				if(player == PLAYER1) 
-					player1Count++;
-				else
-					player2Count++;
-				
+				isHit = true;				
 				//remove coord from ship list
 				s.removeCoordinate(c);
 				System.out.print("REMOVED COORDINATE: " + c.toString() + s.toString());
+				hitShip = s.getName();
 			}//end if
 		}//end for
+		toServer.writeBoolean(isHit);
+		toServer.writeUTF(hitShip);
 		return isHit;
+		
 	}//end isHit()
 	
 	/*
