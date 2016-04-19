@@ -1,7 +1,7 @@
 # Battleship --- Project by Jessica B and Robert I
 Simple Battleship game using server/client set up and GUI
 
-# Overall steps of a game
+# Overall steps of a Game
   1. Server collects two players and starts game
   2. Player 1 selects first move coords
   3. Server recieves and sends selected cords to player 2
