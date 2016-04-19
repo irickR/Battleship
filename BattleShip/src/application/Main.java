@@ -131,6 +131,7 @@ public class Main extends Application implements Constants {
 	
 	public void connectToServer() throws UnknownHostException, IOException{
 		Socket socket = new Socket("localhost", 8000);
+		//Socket socket = new Socket("153.91.62.3", 8000);
 		System.out.println("CONNECTED");
 		toServer = new DataOutputStream(socket.getOutputStream());		
 		fromServer = new DataInputStream(socket.getInputStream());
