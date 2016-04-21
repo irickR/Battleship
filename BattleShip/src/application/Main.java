@@ -83,6 +83,7 @@ public class Main extends Application implements Constants {
 	int player2Count = 0;
 	Stage primaryStage;
 	String hitShip = ""; 
+	
 	@Override
 	public void start(Stage primaryStage) throws UnknownHostException, IOException {
 			Scene scene = new Scene(root, 390, 625);
@@ -249,7 +250,7 @@ public class Main extends Application implements Constants {
 			if(player == PLAYER1)
 			bottomGrid[rowReceived][colReceived].setFill(Color.RED);
 			if(player == PLAYER2)
-				bottomGrid[rowReceived][colReceived].setFill(Color.RED);
+			bottomGrid[rowReceived][colReceived].setFill(Color.RED);
 		}
 		else{
 			if(player == PLAYER1)
@@ -264,7 +265,7 @@ public class Main extends Application implements Constants {
 	
 	public void receiveIsHit() throws IOException{
 		boolean isHit = fromServer.readBoolean();
-		String hitShip = fromServer.readUTF();
+		//String hitShip = fromServer.readUTF();
 		
 		System.out.println("rec " + isHit + " " + hitShip);
 		////CHANGE COLOR OF SHIP HIT//////////////////////////////////////////
@@ -337,7 +338,7 @@ public class Main extends Application implements Constants {
 			}//end if
 		}//end for
 		//toServer.writeBoolean(isHit);
-		toServer.writeUTF(hitShip);
+		//toServer.writeUTF(hitShip);
 		return isHit;
 		
 	}//end isHit()

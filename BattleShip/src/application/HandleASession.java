@@ -56,14 +56,14 @@ public class HandleASession implements Runnable, Constants {
 					toPlayer2.writeInt(colSelected);
 					
 				//wait for hit or miss answer
-					String hitShip = fromPlayer2.readUTF();
+					//String hitShip = fromPlayer2.readUTF();
 					boolean isHit = fromPlayer2.readBoolean();
 					//boolean isDestroyed = fromPlayer2.readBoolean();
 
 					
 				//send hit or miss answer back
 					toPlayer1.writeBoolean(isHit);
-					toPlayer1.writeUTF(hitShip);
+					//toPlayer1.writeUTF(hitShip);
 					//toPlayer1.writeBoolean(isDestroyed);
 
 					
@@ -78,12 +78,12 @@ public class HandleASession implements Runnable, Constants {
 						
 					//wait for hit or miss answer
 						isHit = fromPlayer1.readBoolean();
-						hitShip = fromPlayer1.readUTF();
+						//hitShip = fromPlayer1.readUTF();
 						//isDestroyed = fromPlayer1.readBoolean();
 						
 					//send hit or miss answer back
 						toPlayer2.writeBoolean(isHit);
-						toPlayer2.writeUTF(hitShip);
+						//toPlayer2.writeUTF(hitShip);
 						//toPlayer2.writeBoolean(isDestroyed);
 				
 			}
