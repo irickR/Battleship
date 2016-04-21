@@ -187,15 +187,14 @@ public class Main extends Application implements Constants {
 	  
 	        // Continue to play
 	        while (continueToPlay) { 
-	        	if ((player1Count == 12) || (player2Count == 12))
-	        			printWinnings();
+	        	/*if ((player1Count == 12) || (player2Count == 12))
+	        			printWinnings();*/
 	        	
 	          if (player == PLAYER1) {
 	        	Platform.runLater(() -> {
 		            statusLbl.setText("Your move.");
 		          });
 	        	waitForAction(); // Wait for player 1 to move
-	        	
 	            sendCoord(); 
 	            System.out.println("Player 1 sent a cord.");// Send the move to the server
 	            receiveIsHit(); //recieve if its a hit or miss from server
@@ -209,7 +208,6 @@ public class Main extends Application implements Constants {
 	          }
 	          else if (player == PLAYER2) {  
 	        	//receiveInfoFromServer(); 
-	        	
 	            receiveCoord(); // Receive info from the server
 	           // Determine if its hit and send RECEIVE COORD DOES THIS TOO
 	           // Wait for player 2 to move
@@ -217,15 +215,13 @@ public class Main extends Application implements Constants {
 		            statusLbl.setText("Your move.");
 		          });
 	            waitForAction(); 
-	            
 	            sendCoord(); // Send player 2's move to the server
 	            receiveIsHit();
-	            p2Turn = false;
 	            p1Turn = true; 
-	            Platform.runLater(() -> {
+	            p2Turn = false;
+	            Platform.runLater(() -> { 
 		            statusLbl.setText("Waiting for Player 1 to move.");
 		          });
-	          
 	          }
 	        }//end while continueToPlay
 	      }//end try
@@ -238,7 +234,6 @@ public class Main extends Application implements Constants {
 	public void printWinnings() {
 		
 	}
-	
 	
 	/*
 	 * receive coordinates that opponent chose and determine if it is a hit or miss, send this to server to inform opponent
@@ -263,7 +258,7 @@ public class Main extends Application implements Constants {
 				bottomGrid[rowReceived][colReceived].setFill(Color.DARKBLUE);
 				
 		}
-		//toServer.writeBoolean(isHit);
+		toServer.writeBoolean(isHit);
 		System.out.println("sent" + isHit);
 	}//end receiveCoord()
 	
@@ -271,10 +266,16 @@ public class Main extends Application implements Constants {
 		boolean isHit = fromServer.readBoolean();
 		String hitShip = fromServer.readUTF();
 		
-		System.out.println("rec " + isHit);
+		System.out.println("rec " + isHit + " " + hitShip);
 		////CHANGE COLOR OF SHIP HIT//////////////////////////////////////////
-		switch(hitShip) {
-			case("BattleShip"):
+		if(isHit){
+			if(player == PLAYER1)
+				topGrid[rowSelected][colSelected].setFill(Color.RED);
+			if(player == PLAYER2)
+				topGrid[rowSelected][colSelected].setFill(Color.RED);
+			
+			switch(hitShip) {
+			case("Battleship"):
 				battleshipLbl.setFill(Color.ORANGE);
 				break;
 			case("Submarine"):
@@ -286,14 +287,9 @@ public class Main extends Application implements Constants {
 			case("Patrol Boat"):
 				battleshipLbl.setFill(Color.ORANGE);
 				break;
-
-		}
-		//Coordinate hit = new Coordinate(rowReceived, colReceived);
-		if(isHit){
-			if(player == PLAYER1)
-				topGrid[rowSelected][colSelected].setFill(Color.RED);
-			if(player == PLAYER2)
-				topGrid[rowSelected][colSelected].setFill(Color.RED);
+			default:
+				break;
+			}
 		}
 		else{
 			if(player == PLAYER1)
@@ -340,7 +336,7 @@ public class Main extends Application implements Constants {
 				hitShip = s.getName();
 			}//end if
 		}//end for
-		toServer.writeBoolean(isHit);
+		//toServer.writeBoolean(isHit);
 		toServer.writeUTF(hitShip);
 		return isHit;
 		
