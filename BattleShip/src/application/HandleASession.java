@@ -60,13 +60,17 @@ public class HandleASession implements Runnable, Constants {
 					String hitShip = fromPlayer2.readUTF();
 					System.out.println("Server got: " + hitShip);
 
-					//boolean isDestroyed = fromPlayer2.readBoolean();
+					boolean isDestroyed = fromPlayer2.readBoolean();
+					System.out.println("Server got that is was destroyed: " + hitShip);
+					boolean isGameOver = fromPlayer2.readBoolean();
+					System.out.println("Server got that the game was over: " + isGameOver);
 
 					
 				//send hit or miss answer back
 					toPlayer1.writeBoolean(isHit);
 					toPlayer1.writeUTF(hitShip);
-					//toPlayer1.writeBoolean(isDestroyed);
+					toPlayer1.writeBoolean(isDestroyed);
+					toPlayer1.writeBoolean(isGameOver);
 
 					
 				//player 2 moves******************************
@@ -81,13 +85,17 @@ public class HandleASession implements Runnable, Constants {
 					//wait for hit or miss answer
 						isHit = fromPlayer1.readBoolean();
 						hitShip = fromPlayer1.readUTF();
-						//isDestroyed = fromPlayer1.readBoolean();
+						System.out.println("Server got: " + hitShip);
+						isDestroyed = fromPlayer1.readBoolean();
+						System.out.println("Server got that is was destroyed: " + hitShip);
+						isGameOver = fromPlayer1.readBoolean();
 						
 					//send hit or miss answer back
 						toPlayer2.writeBoolean(isHit);
 						toPlayer2.writeUTF(hitShip);
 						
-						//toPlayer2.writeBoolean(isDestroyed);
+						toPlayer2.writeBoolean(isDestroyed);
+						toPlayer2.writeBoolean(isGameOver);
 				
 			}
 		} catch(Exception e){}

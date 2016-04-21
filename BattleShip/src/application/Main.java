@@ -17,6 +17,7 @@ import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
@@ -83,6 +84,8 @@ public class Main extends Application implements Constants {
 	int player2Count = 0;
 	Stage primaryStage;
 	String hitShip = ""; 
+	boolean isDestroyed = false;
+	boolean isGameOver = false;
 	
 	@Override
 	public void start(Stage primaryStage) throws UnknownHostException, IOException {
@@ -199,6 +202,7 @@ public class Main extends Application implements Constants {
 	            sendCoord(); 
 	            System.out.println("Player 1 sent a cord.");// Send the move to the server
 	            receiveIsHit(); //recieve if its a hit or miss from server
+	            isGameOver();
 	            p1Turn = false;
 	            p2Turn = true;
 	            Platform.runLater(() -> {
@@ -218,6 +222,7 @@ public class Main extends Application implements Constants {
 	            waitForAction(); 
 	            sendCoord(); // Send player 2's move to the server
 	            receiveIsHit();
+	            isGameOver();
 	            p1Turn = true; 
 	            p2Turn = false;
 	            Platform.runLater(() -> { 
@@ -232,8 +237,20 @@ public class Main extends Application implements Constants {
 	    }).start();
 	}//end connectToServer()
 	
-	public void printWinnings() {
-		
+	public void isGameOver() {
+		int numOfShipsDestroyed = 0;
+		for(Ship s: ships) {
+			if(s.getCoordinates().isEmpty()) {
+				numOfShipsDestroyed++;
+			}
+		}
+		if(numOfShipsDestroyed == 4) {
+			isGameOver = true;
+			continueToPlay = false;
+		}
+		else {
+			isGameOver = false;
+		}
 	}
 	
 	/*
@@ -261,12 +278,16 @@ public class Main extends Application implements Constants {
 		}
 		toServer.writeBoolean(isHit);
 		toServer.writeUTF(hitShip);
+		toServer.writeBoolean(isDestroyed);
+		toServer.writeBoolean(isGameOver);
 		System.out.println("sent" + isHit);
 	}//end receiveCoord()
 	
 	public void receiveIsHit() throws IOException{
 		boolean isHit = fromServer.readBoolean();
 		String hitShip = fromServer.readUTF();
+		boolean isDestroyed = fromServer.readBoolean();
+		boolean isGameOver = fromServer.readBoolean();
 		
 		System.out.println("rec " + isHit + " " + hitShip);
 		////CHANGE COLOR OF SHIP HIT//////////////////////////////////////////
@@ -299,10 +320,40 @@ public class Main extends Application implements Constants {
 			if(player == PLAYER2)
 				topGrid[rowSelected][colSelected].setFill(Color.DARKBLUE);		
 		}
+		
+		//if else for isDestroyed Coloring
+		if(isDestroyed){
+			switch(hitShip) {
+			case("Battleship"):
+				battleshipLbl.setFill(Color.RED);
+				break;
+			case("Submarine"):
+				submarineLbl.setFill(Color.RED);
+				break;
+			case("Destroyer"):
+				destroyerLbl.setFill(Color.RED);
+				break;
+			case("Patrol Boat"):
+				patrolBoatLbl.setFill(Color.RED);
+				break;
+			default:
+				break;
+			}
+		}
+		
+		if(isGameOver) {
+			
+		}
+		
+	
 	}//end receiveIsHit()
 	
-	public boolean isDestroyed(){
-		return true;
+	public void isDestroyed(Ship s){
+		if(s.getCoordinates().isEmpty()) {
+			isDestroyed = true;
+		}
+		else
+			isDestroyed = false;
 	}//isDestroyed
 	
 	/*
@@ -336,7 +387,7 @@ public class Main extends Application implements Constants {
 				s.removeCoordinate(c);
 				System.out.print("REMOVED COORDINATE: " + c.toString() + s.toString());
 				hitShip = s.getName();
-				
+				isDestroyed(s);
 			}//end if
 		}//end for
 		//toServer.writeBoolean(isHit);
