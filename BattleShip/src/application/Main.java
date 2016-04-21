@@ -260,12 +260,13 @@ public class Main extends Application implements Constants {
 				
 		}
 		toServer.writeBoolean(isHit);
+		toServer.writeUTF(hitShip);
 		System.out.println("sent" + isHit);
 	}//end receiveCoord()
 	
 	public void receiveIsHit() throws IOException{
 		boolean isHit = fromServer.readBoolean();
-		//String hitShip = fromServer.readUTF();
+		String hitShip = fromServer.readUTF();
 		
 		System.out.println("rec " + isHit + " " + hitShip);
 		////CHANGE COLOR OF SHIP HIT//////////////////////////////////////////
@@ -280,13 +281,13 @@ public class Main extends Application implements Constants {
 				battleshipLbl.setFill(Color.ORANGE);
 				break;
 			case("Submarine"):
-				battleshipLbl.setFill(Color.ORANGE);
+				submarineLbl.setFill(Color.ORANGE);
 				break;
 			case("Destroyer"):
-				battleshipLbl.setFill(Color.ORANGE);
+				destroyerLbl.setFill(Color.ORANGE);
 				break;
 			case("Patrol Boat"):
-				battleshipLbl.setFill(Color.ORANGE);
+				patrolBoatLbl.setFill(Color.ORANGE);
 				break;
 			default:
 				break;
@@ -335,6 +336,7 @@ public class Main extends Application implements Constants {
 				s.removeCoordinate(c);
 				System.out.print("REMOVED COORDINATE: " + c.toString() + s.toString());
 				hitShip = s.getName();
+				
 			}//end if
 		}//end for
 		//toServer.writeBoolean(isHit);
