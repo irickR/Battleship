@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
@@ -28,6 +29,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -86,6 +88,8 @@ public class Main extends Application implements Constants {
 	String hitShip = ""; 
 	boolean isDestroyed = false;
 	boolean isGameOver = false;
+	Alert gameWonAlert = new Alert(AlertType.WARNING);
+	Alert gameLostAlert = new Alert(AlertType.WARNING);
 	
 	@Override
 	public void start(Stage primaryStage) throws UnknownHostException, IOException {
@@ -148,6 +152,15 @@ public class Main extends Application implements Constants {
 			submarineLbl.setFill(Color.GREEN);
 			destroyerLbl.setFill(Color.GREEN);
 			patrolBoatLbl.setFill(Color.GREEN);
+			
+			gameWonAlert.setTitle("Game Over");
+			gameWonAlert.setHeaderText(null);
+			gameWonAlert.setContentText("You Won!");
+
+			gameLostAlert.setTitle("Game Over");
+			gameLostAlert.setHeaderText(null);
+			gameLostAlert.setContentText("You Lost");
+
 			connectToServer();	
 	}//end start()
 	
@@ -177,7 +190,6 @@ public class Main extends Application implements Constants {
 	          Platform.runLater(() -> 
 	          statusLbl.setText("Player 2 has joined. I start first"));
 	          
-	  
 	          // It is my turn
 	          p1Turn = true;
 	          
@@ -191,8 +203,6 @@ public class Main extends Application implements Constants {
 	  
 	        // Continue to play
 	        while (continueToPlay) { 
-	        	/*if ((player1Count == 12) || (player2Count == 12))
-	        			printWinnings();*/
 	        	
 	          if (player == PLAYER1) {
 	        	Platform.runLater(() -> {
@@ -247,6 +257,10 @@ public class Main extends Application implements Constants {
 		if(numOfShipsDestroyed == 4) {
 			isGameOver = true;
 			continueToPlay = false;
+			//i lost////////////////////////////////////////////////////////////////////////////////////////////
+			Platform.runLater(() -> { 
+	            gameLostAlert.showAndWait();
+	          });
 		}
 		else {
 			isGameOver = false;
@@ -341,11 +355,12 @@ public class Main extends Application implements Constants {
 			}
 		}
 		
-		if(isGameOver) {
-			
+		if(isGameOver) { //i won///////////////////////////////////////////////////////////////////////////
+			Platform.runLater(() -> { 
+				gameWonAlert.showAndWait();
+	        });
 		}
 		
-	
 	}//end receiveIsHit()
 	
 	public void isDestroyed(Ship s){
