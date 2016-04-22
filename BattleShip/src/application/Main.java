@@ -64,7 +64,7 @@ public class Main extends Application implements Constants {
 	Label alert = new Label();
 	Label playerLbl = new Label("Player");
 	Label statusLbl = new Label("Game Status");
-	Text opponentsShipsLbl = new Text("Opponent's\nships:");
+	Text opponentsShipsLbl = new Text("Opponent's\nships");
 	Text battleshipLbl = new Text("Battleship");
 	Text submarineLbl = new Text("Submarine");
 	Text destroyerLbl = new Text("Destroyer");
@@ -256,11 +256,12 @@ public class Main extends Application implements Constants {
 		}
 		if(numOfShipsDestroyed == 4) {
 			isGameOver = true;
-			continueToPlay = false;
+			//continueToPlay = false;   <-removing this shows I won on next click
 			//i lost////////////////////////////////////////////////////////////////////////////////////////////
 			Platform.runLater(() -> { 
 	            gameLostAlert.showAndWait();
 	          });
+			
 		}
 		else {
 			isGameOver = false;
