@@ -261,7 +261,7 @@ public class Main extends Application implements Constants {
 			Platform.runLater(() -> { 
 	            gameLostAlert.showAndWait();
 	          });
-			
+			//continueToPlay = false;
 		}
 		else {
 			isGameOver = false;
@@ -289,7 +289,6 @@ public class Main extends Application implements Constants {
 				bottomGrid[rowReceived][colReceived].setFill(Color.DARKBLUE);
 			if(player == PLAYER2)
 				bottomGrid[rowReceived][colReceived].setFill(Color.DARKBLUE);
-				
 		}
 		toServer.writeBoolean(isHit);
 		toServer.writeUTF(hitShip);
@@ -355,13 +354,11 @@ public class Main extends Application implements Constants {
 				break;
 			}
 		}
-		
 		if(isGameOver) { //i won///////////////////////////////////////////////////////////////////////////
 			Platform.runLater(() -> { 
 				gameWonAlert.showAndWait();
 	        });
 		}
-		
 	}//end receiveIsHit()
 	
 	public void isDestroyed(Ship s){
