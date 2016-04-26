@@ -731,12 +731,12 @@ public class Main extends Application implements Constants {
 					if(!overlaps(ships, c) && !(offGrid(c))){
 						ship.add(c);
 						System.out.println("v added " + c.toString());
-						alert.setText("alert");
+						alert.setText("");
 						if(i == size - 1)
 						shipCreated = true;
 					}
 					else{
-						alert.setText("Ships overlap/ off grid");
+						alert.setText("Ship overlaps another \nship or is off grid");
 						ship.clear();
 						break;
 					}
@@ -748,12 +748,11 @@ public class Main extends Application implements Constants {
 					if(!overlaps(ships, c) && !offGrid(c)){
 						ship.add(c);
 						System.out.println("h added " + c.toString());
-						alert.setText("Alert");
 						if(i == size - 1)
 						shipCreated = true;
 					}
 					else{
-						alert.setText("ships overlap/ off grid");
+						alert.setText("Ship overlaps another \nship or is off grid");
 						ship.clear();
 						break;
 					}
@@ -836,7 +835,6 @@ public class Main extends Application implements Constants {
 					if(!overlaps(ships, c) && !(offGrid(c))){
 						randomShip.add(c);
 						System.out.println("v added " + c.toString());
-						alert.setText("alert");
 						if(i == size - 1)
 						shipCreated = true;
 					}
@@ -852,7 +850,6 @@ public class Main extends Application implements Constants {
 					if(!overlaps(ships, c) && !offGrid(c)){
 						randomShip.add(c);
 						System.out.println("h added " + c.toString());
-						alert.setText("Alert");
 						if(i == size - 1)
 						shipCreated = true;
 					}
