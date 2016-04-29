@@ -6,7 +6,7 @@ import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server implements Constants {
+public class Server/* implements Constants*/ {
 	public static void main(String[] args) {
 		
 	new Thread (() -> {
@@ -19,13 +19,13 @@ public class Server implements Constants {
 					//connects to player 1
 					Socket player1 = serverSocket.accept();
 					System.out.println("Player 1 connected.");
-					new DataOutputStream(player1.getOutputStream()).writeInt(PLAYER1);
+					new DataOutputStream(player1.getOutputStream()).writeInt(1);
 					
 
 					//connects to player 2
 					Socket player2 = serverSocket.accept();
 					System.out.println("Player 2 connected.");
-					new DataOutputStream(player2.getOutputStream()).writeInt(PLAYER2);
+					new DataOutputStream(player2.getOutputStream()).writeInt(2);
 
 					//starts the game with 2 players
 					new Thread(new HandleASession(player1, player2)).start();

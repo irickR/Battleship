@@ -34,7 +34,6 @@ public class HandleASession implements Runnable, Constants {
 			toPlayer2 = new DataOutputStream(player2.getOutputStream());
 
 			//this is used just to start player 1
-			//line 144 of main
 			
 			//ignored write
 			toPlayer1.writeInt(0);
@@ -43,9 +42,6 @@ public class HandleASession implements Runnable, Constants {
 			//the game is actually ran here
 			while(true) {
 				//Receive move from player 1******************
-				//main line 214
-				//toPlayer1.writeInt(4);
-				//toPlayer2.writeInt(4);
 				int rowSelected = fromPlayer1.readInt();
 				int colSelected = fromPlayer1.readInt();
 				System.out.println("Server read " + rowSelected + ", " + colSelected);

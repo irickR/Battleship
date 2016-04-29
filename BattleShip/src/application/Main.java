@@ -1,13 +1,11 @@
 package application;
-	//tesst comeen
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 import javafx.application.Application;
@@ -15,43 +13,26 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-/*
- * 
- * block.length // the number of rows
-block[0].length // the number of columns on row 0
-block[1].length // the number of columns on row 1
- */
+
 import javafx.scene.text.TextAlignment;
-/* 
- * turn:
- * connection
- * send player1 coord selection
- * player2 recieves, changes color
- * player2 sends hit/miss boolean
- * player1 recieves boolean, changes color
- * 
- */
-public class Main extends Application implements Constants {
+
+public class Main extends Application /*implements Constants*/ {
 	Ship battleship;
 	Ship submarine;
 	Ship destroyer;
@@ -65,10 +46,10 @@ public class Main extends Application implements Constants {
 	Label playerLbl = new Label("Player");
 	Label statusLbl = new Label("Game Status");
 	Text opponentsShipsLbl = new Text("Opponent's\nships");
-	Text battleshipLbl = new Text("Battleship");
-	Text submarineLbl = new Text("Submarine");
-	Text destroyerLbl = new Text("Destroyer");
-	Text patrolBoatLbl = new Text("Patrol Boat");
+	Text battleshipLbl = new Text("Battleship (4)");
+	Text submarineLbl = new Text("Submarine (3)");
+	Text destroyerLbl = new Text("Destroyer (3)");
+	Text patrolBoatLbl = new Text("Patrol Boat (2)");
 	int player;
 	BorderPane root = new BorderPane();
 	Pane gridPane = new Pane();
@@ -95,12 +76,11 @@ public class Main extends Application implements Constants {
 	public void start(Stage primaryStage) throws UnknownHostException, IOException {
 			Scene scene = new Scene(root, 390, 625);
 			alert.setTextFill(Color.RED);
-
 			drawGrid(topGrid, gridPane, 10, 10);
 			drawGrid(bottomGrid, gridPane, 10, 300);
 			primaryStage.setScene(scene);
+			primaryStage.setTitle("Battleship");
 			primaryStage.show();
-			
 			shipPlacement();
 	
 			//highlight squares on mouse hover
@@ -117,21 +97,6 @@ public class Main extends Application implements Constants {
 						topGrid[indexI][indexJ].setFill(Color.LIGHTBLUE);
 						topGrid[indexI][0].setFill(Color.LIGHTGRAY);
 						topGrid[0][indexJ].setFill(Color.LIGHTGRAY);
-					});
-					topGrid[indexI][indexJ].setOnMouseClicked(e -> {
-						rowSelected = indexI;
-						colSelected = indexJ;
-						System.out.println("Coordinate to send: Row: " + rowSelected + " Column: " + colSelected);
-						topGrid[indexI][indexJ].setOnMouseEntered(null);
-						topGrid[indexI][indexJ].setOnMouseExited(null);
-						topGrid[indexI][indexJ].setOnMouseClicked(null);
-						//////////////////sendCoord();
-						waiting = false;
-						try {
-							//sendCoord(indexI, indexJ);
-						} catch (Exception e1) {
-							e1.printStackTrace();
-						}
 					});
 				}
 			}//end square highlight
@@ -177,15 +142,13 @@ public class Main extends Application implements Constants {
 	        player = fromServer.readInt();
 	        System.out.println(player);
 	        // Am I player 1 or 2?
-	        if (player == PLAYER1) {
+	        if (player == 1) {
 	          Platform.runLater(() -> {
 	            playerLbl.setText("Player 1");
 	            statusLbl.setText("Waiting for player 2 to join");
 	          });
-	  
 	          // Receive startup notification from the server
 	          int x = fromServer.readInt(); // Whatever read is ignored
-	          System.out.println("x  " + x);
 	          // The other player has joined
 	          Platform.runLater(() -> 
 	          statusLbl.setText("Player 2 has joined. I start first"));
@@ -194,7 +157,7 @@ public class Main extends Application implements Constants {
 	          p1Turn = true;
 	          
 	        }
-	        else if (player == PLAYER2) {
+	        else if (player == 2) {
 	          Platform.runLater(() -> {
 	        	playerLbl.setText("Player 2");
 	            statusLbl.setText("Waiting for player 1 to move");
@@ -204,16 +167,18 @@ public class Main extends Application implements Constants {
 	        // Continue to play
 	        while (continueToPlay) { 
 	        	
-	          if (player == PLAYER1) {
+	          if (player == 1) {
 	        	Platform.runLater(() -> {
 		            statusLbl.setText("Your move.");
 		          });
+	        	setAction();
 	        	waitForAction(); // Wait for player 1 to move
-	            sendCoord(); 
-	            System.out.println("Player 1 sent a cord.");// Send the move to the server
+	            sendCoord(); // Send the move to the server
+	            System.out.println("Player 1 sent a cord.");
 	            receiveIsHit(); //recieve if its a hit or miss from server
 	            isGameOver();
 	            p1Turn = false;
+	            removeAction();
 	            p2Turn = true;
 	            Platform.runLater(() -> {
 		            statusLbl.setText("Waiting for Player 2 to move.");
@@ -221,20 +186,20 @@ public class Main extends Application implements Constants {
 	            receiveCoord();
 	           // receiveInfoFromServer();
 	          }
-	          else if (player == PLAYER2) {  
-	        	//receiveInfoFromServer(); 
-	            receiveCoord(); // Receive info from the server
-	           // Determine if its hit and send RECEIVE COORD DOES THIS TOO
-	           // Wait for player 2 to move
+	          else if (player == 2) {  
+	        	removeAction();
+	            receiveCoord();
 	            Platform.runLater(() -> {
 		            statusLbl.setText("Your move.");
 		          });
+	            setAction();
 	            waitForAction(); 
 	            sendCoord(); // Send player 2's move to the server
 	            receiveIsHit();
 	            isGameOver();
 	            p1Turn = true; 
 	            p2Turn = false;
+	            removeAction();
 	            Platform.runLater(() -> { 
 		            statusLbl.setText("Waiting for Player 1 to move.");
 		          });
@@ -247,7 +212,41 @@ public class Main extends Application implements Constants {
 	    }).start();
 	}//end connectToServer()
 	
-	public void isGameOver() {
+	//disables on click when it is not players turn
+	public void removeAction(){
+		for( int i = 1; i <= 10; i++){
+			for( int j = 1; j <= 10; j++){
+				if(topGrid[i][j].getFill() == Color.LIGHTBLUE){
+					topGrid[i][j].setOnMouseClicked(null);
+				}
+			}
+		}
+	}//end remove action
+	
+	//enables on click when it is players turn
+	public void setAction(){
+		for( int i = 1; i <= 10; i++){
+			for( int j = 1; j <= 10; j++){
+				final int indexI = i;
+				final int indexJ = j;
+				if(topGrid[i][j].getFill() == Color.LIGHTBLUE){
+					topGrid[i][j].setOnMouseClicked(e -> {
+						rowSelected = indexI;
+						colSelected = indexJ;
+						System.out.println("Coordinate to send: Row: " + rowSelected + " Column: " + colSelected);
+						topGrid[indexI][0].setFill(Color.LIGHTGRAY);
+						topGrid[0][indexJ].setFill(Color.LIGHTGRAY);
+						topGrid[indexI][indexJ].setOnMouseEntered(null);
+						topGrid[indexI][indexJ].setOnMouseExited(null);
+						topGrid[indexI][indexJ].setOnMouseClicked(null);
+						waiting = false;
+					});
+				}
+			}
+		}
+	}//end replace action
+	
+	public int isGameOver() {
 		int numOfShipsDestroyed = 0;
 		for(Ship s: ships) {
 			if(s.getCoordinates().isEmpty()) {
@@ -255,16 +254,16 @@ public class Main extends Application implements Constants {
 			}
 		}
 		if(numOfShipsDestroyed == 4) {
-			isGameOver = true;
-			//continueToPlay = false;   <-removing this shows I won on next click
-			//i lost////////////////////////////////////////////////////////////////////////////////////////////
+			//i lost/
 			Platform.runLater(() -> { 
 	            gameLostAlert.showAndWait();
 	          });
-			//continueToPlay = false;
+			isGameOver = true;
+			return player;
 		}
 		else {
 			isGameOver = false;
+			return 0;
 		}
 	}
 	
@@ -279,15 +278,15 @@ public class Main extends Application implements Constants {
 		boolean isHit = isHit(/*ships,*/ rowReceived, colReceived);
 		
 		if(isHit){
-			if(player == PLAYER1)
+			if(player == 1)
 			bottomGrid[rowReceived][colReceived].setFill(Color.RED);
-			if(player == PLAYER2)
+			if(player == 2)
 			bottomGrid[rowReceived][colReceived].setFill(Color.RED);
 		}
 		else{
-			if(player == PLAYER1)
+			if(player == 1)
 				bottomGrid[rowReceived][colReceived].setFill(Color.DARKBLUE);
-			if(player == PLAYER2)
+			if(player == 2)
 				bottomGrid[rowReceived][colReceived].setFill(Color.DARKBLUE);
 		}
 		toServer.writeBoolean(isHit);
@@ -306,9 +305,9 @@ public class Main extends Application implements Constants {
 		System.out.println("rec " + isHit + " " + hitShip);
 		////CHANGE COLOR OF SHIP HIT//////////////////////////////////////////
 		if(isHit){
-			if(player == PLAYER1)
+			if(player == 1)
 				topGrid[rowSelected][colSelected].setFill(Color.RED);
-			if(player == PLAYER2)
+			if(player == 2)
 				topGrid[rowSelected][colSelected].setFill(Color.RED);
 			
 			switch(hitShip) {
@@ -329,9 +328,9 @@ public class Main extends Application implements Constants {
 			}
 		}
 		else{
-			if(player == PLAYER1)
+			if(player == 1)
 				topGrid[rowSelected][colSelected].setFill(Color.DARKBLUE);	
-			if(player == PLAYER2)
+			if(player == 2)
 				topGrid[rowSelected][colSelected].setFill(Color.DARKBLUE);		
 		}
 		
@@ -354,7 +353,7 @@ public class Main extends Application implements Constants {
 				break;
 			}
 		}
-		if(isGameOver) { //i won///////////////////////////////////////////////////////////////////////////
+		if(isGameOver) { //i won//
 			Platform.runLater(() -> { 
 				gameWonAlert.showAndWait();
 	        });
@@ -403,8 +402,6 @@ public class Main extends Application implements Constants {
 				isDestroyed(s);
 			}//end if
 		}//end for
-		//toServer.writeBoolean(isHit);
-		//toServer.writeUTF(hitShip);
 		return isHit;
 		
 	}//end isHit()
@@ -552,7 +549,7 @@ public class Main extends Application implements Constants {
 				placeSubmarine();
 			}
 			catch(NumberFormatException ex){
-				alert.setText("incorrect number format");
+				alert.setText("Not a valid \ncoordinate");
 				bX.setText("");
 				bY.setText("");
 			}
@@ -560,6 +557,7 @@ public class Main extends Application implements Constants {
 	}//end placeBattleship()
 	
 	public void placeSubmarine(){
+		alert.setText("");
 		GridPane pane = new GridPane();
 		pane.setHgap(10);
 		pane.setVgap(10);
@@ -606,7 +604,7 @@ public class Main extends Application implements Constants {
 				placeDestroyer();
 			}
 			catch(NumberFormatException ex){
-				alert.setText("incorrect number format");
+				alert.setText("Not a valid \ncoordinate");
 				sX.setText("");
 				sY.setText("");
 			}
@@ -614,6 +612,7 @@ public class Main extends Application implements Constants {
 	}//end placeSubmarine()
 	
 	public void placeDestroyer(){
+		alert.setText("");
 		GridPane pane = new GridPane();
 		pane.setHgap(10);
 		pane.setVgap(10);
@@ -640,9 +639,12 @@ public class Main extends Application implements Constants {
 		BorderPane bPane = new BorderPane();
 		bPane.setPadding(new Insets(10, 10, 10, 10));
 		BorderPane.setAlignment(info, Pos.CENTER);
+		HBox hbox = new HBox(10);
+		hbox.getChildren().addAll(alert, placeDestroyer);
+		hbox.setAlignment(Pos.CENTER);
 		bPane.setCenter(pane);
 		bPane.setTop(info);
-		bPane.setBottom(placeDestroyer);
+		bPane.setBottom(hbox);
 		BorderPane.setAlignment(placeDestroyer, Pos.CENTER_RIGHT);
 		Stage destroyerStage = new Stage();
 		Scene scene = new Scene(bPane, 300, 140);
@@ -657,7 +659,7 @@ public class Main extends Application implements Constants {
 				placePatrolBoat();
 			}
 			catch(NumberFormatException ex){
-				alert.setText("incorrect number format");
+				alert.setText("Not a valid \ncoordinate");
 				dX.setText("");
 				dY.setText("");
 			}
@@ -665,6 +667,7 @@ public class Main extends Application implements Constants {
 	}//end placeDestroyer()
 	
 	public void placePatrolBoat(){
+		alert.setText("");
 		GridPane pane = new GridPane();
 		pane.setHgap(10);
 		pane.setVgap(10);
@@ -691,9 +694,12 @@ public class Main extends Application implements Constants {
 		BorderPane bPane = new BorderPane();
 		bPane.setPadding(new Insets(10, 10, 10, 10));
 		BorderPane.setAlignment(info, Pos.CENTER);
+		HBox hbox = new HBox(10);
+		hbox.getChildren().addAll(alert, placePatrolBoat);
+		hbox.setAlignment(Pos.CENTER);
 		bPane.setCenter(pane);
 		bPane.setTop(info);
-		bPane.setBottom(placePatrolBoat);
+		bPane.setBottom(hbox);
 		BorderPane.setAlignment(placePatrolBoat, Pos.CENTER_RIGHT);
 		Stage patrolBoatStage = new Stage();
 		Scene scene = new Scene(bPane, 300, 140);
@@ -707,7 +713,7 @@ public class Main extends Application implements Constants {
 				ships.add(patrolBoat);
 			}
 			catch(NumberFormatException ex){
-				alert.setText("incorrect number format");
+				alert.setText("Not a valid \ncoordinate");
 				pX.setText("");
 				pY.setText("");
 			}
