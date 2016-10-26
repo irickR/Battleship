@@ -13,11 +13,3 @@ Simple Battleship game using server/client set up and GUI
   7. repeat for player 2
   8. continue until player1 or player2 count hits 12
     +number of hits to destroy all ships
-
-
-# Methods List
-# Known Problems & To Do
-+ stopping player from moving before turn
-  - appears to be "queueing" moves, but still needs click to send first of queue
-+ no winner display
-+ no disconnect
